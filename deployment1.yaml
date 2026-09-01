@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: express
+  labels:
+    app: express
+spec:
+  selector: 
+    matchLabels:
+      app: express
+  replicas: 1
+  template: 
+    metadata:
+      labels:
+        app: "express"
+    spec:
+      containers:
+        - name: express
+          image: "gacarneirojr/node_arm64:1.4"
