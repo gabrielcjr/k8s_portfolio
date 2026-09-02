@@ -53,7 +53,7 @@ check_endpoint() {
     local http_code
     http_code=$(curl -k -s -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "ERR")
     
-    if [ "$http_code" = "200" ] || [ "$http_code" = "405" ] || [ "$http_code" = "301" ]; then
+    if [ "$http_code" = "200" ] || [ "$http_code" = "405" ] || [ "$http_code" = "301" ] || [ "$http_code" = "302" ]; then
         printf "  %-32s : ${GREEN}${BOLD}✔ ONLINE${NC} (HTTP %s)\n" "$name" "$http_code"
     else
         printf "  %-32s : ${RED}${BOLD}✖ OFFLINE${NC} (HTTP %s)\n" "$name" "$http_code"
@@ -67,6 +67,7 @@ check_endpoint "https://amae.gabrielcjr.website/" "AMAE (K3s Django)"
 check_endpoint "https://findjobs.gabrielcjr.website/" "FindJobs (K3s DevATS)"
 check_endpoint "https://atsproof.website/healthz" "ATS MatchProof (K3s)"
 check_endpoint "https://argocd.gabrielcjr.website/" "ArgoCD Web UI"
+check_endpoint "https://grafana.gabrielcjr.website/" "Grafana Observability UI"
 check_endpoint "https://gabrielcjr.website:8443/" "ArgoCD (Direct Port 8443)"
 
 echo -e "\n${GREEN}${BOLD}✨ All systems operational on Kubernetes (K3s)!${NC}\n"
