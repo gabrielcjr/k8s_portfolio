@@ -132,6 +132,11 @@ spec:
           envFrom:
             - secretRef:
                 name: amae-secret
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: "amae-web"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://tempo.monitoring.svc.cluster.local:4318/v1/traces"
           ports:
             - containerPort: 8000
               name: http

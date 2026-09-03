@@ -135,6 +135,10 @@ spec:
               value: "0.0.0.0"
             - name: NODE_ENV
               value: "production"
+            - name: OTEL_SERVICE_NAME
+              value: "jobs-backend"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://tempo.monitoring.svc.cluster.local:4318"
           ports:
             - containerPort: 3001
               name: http

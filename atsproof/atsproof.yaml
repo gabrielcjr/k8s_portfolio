@@ -25,6 +25,10 @@ spec:
           env:
             - name: PYTHONUNBUFFERED
               value: "1"
+            - name: OTEL_SERVICE_NAME
+              value: "atsproof-api"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://tempo.monitoring.svc.cluster.local:4318"
           ports:
             - containerPort: 8000
               name: http

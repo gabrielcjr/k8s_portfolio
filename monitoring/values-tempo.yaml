@@ -1,0 +1,36 @@
+# Grafana Tempo - Lightweight Single-Binary Tracing on K3s
+tempo:
+  repository: grafana/tempo
+  tag: "2.9.0"
+  pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 20m
+      memory: 100Mi
+    limits:
+      cpu: 250m
+      memory: 384Mi
+  retention: 48h
+  receivers:
+    jaeger:
+      protocols:
+        thrift_http:
+          endpoint: 0.0.0.0:14268
+        grpc:
+          endpoint: 0.0.0.0:14250
+    otlp:
+      protocols:
+        http:
+          endpoint: 0.0.0.0:4318
+        grpc:
+          endpoint: 0.0.0.0:4317
+
+persistence:
+  enabled: true
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+
+service:
+  type: ClusterIP
