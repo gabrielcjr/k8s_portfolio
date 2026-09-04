@@ -67,7 +67,7 @@ check_endpoint "https://amae.gabrielcjr.website/" "AMAE (K3s Django)"
 check_endpoint "https://findjobs.gabrielcjr.website/" "FindJobs (K3s DevATS)"
 check_endpoint "https://atsproof.website/healthz" "ATS MatchProof (K3s)"
 check_endpoint "https://argocd.gabrielcjr.website/" "ArgoCD Web UI"
-check_endpoint "https://grafana.gabrielcjr.website/" "Grafana Observability UI"
+check_endpoint "https://grafana.gabrielcjr.website/" "SigNoz Observability UI"
 check_endpoint "https://gabrielcjr.website:8443/" "ArgoCD (Direct Port 8443)"
 
 echo -e "\n${GREEN}${BOLD}✨ All systems operational on Kubernetes (K3s)!${NC}\n"
