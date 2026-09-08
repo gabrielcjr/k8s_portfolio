@@ -19,6 +19,7 @@ clickhouse:
   zookeeper:
     enabled: true
     replicaCount: 1
+    heapSize: 256
     persistence:
       size: 1Gi
     resources:
@@ -27,7 +28,7 @@ clickhouse:
         memory: 128Mi
       limits:
         cpu: 250m
-        memory: 384Mi
+        memory: 512Mi
 
 signoz:
   replicaCount: 1
