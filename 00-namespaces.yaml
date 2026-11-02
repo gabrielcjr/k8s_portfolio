@@ -1,6 +1,11 @@
 apiVersion: v1
 kind: Namespace
 metadata:
+  name: argocd
+---
+apiVersion: v1
+kind: Namespace
+metadata:
   name: portfolio
 ---
 apiVersion: v1
@@ -21,5 +26,19 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
+  name: edgeshield
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kobo
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jaeger
+---
+apiVersion: v1
+kind: Namespace
+metadata:
   name: leiloes
-
