@@ -1,0 +1,99 @@
+# Rate Limiting & Connection Limiting Zones
+limit_req_zone $binary_remote_addr zone=atsproof_req_limit:10m rate=10r/s;
+limit_conn_zone $binary_remote_addr zone=atsproof_conn_limit:10m;
+
+# HTTP Server: Redirect all traffic to HTTPS (allow ACME challenge)
+server {
+    listen 80;
+    server_name atsproof.website www.atsproof.website;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# HTTPS Server: SSL/TLS Termination + Security Filters + Proxy to FastAPI
+server {
+    listen 443 ssl http2;
+    server_name atsproof.website www.atsproof.website;
+
+    ssl_certificate /etc/letsencrypt/live/atsproof.website/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/atsproof.website/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL_ATS:10m;
+    ssl_session_timeout 10m;
+
+    # Client body limit
+    client_max_body_size 1M;
+
+    # Security Headers
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # Connection Limit
+    limit_conn atsproof_conn_limit 20;
+
+    # Only allow safe HTTP methods
+    if ($request_method !~ ^(GET|POST|HEAD)$ ) {
+        return 405;
+    }
+
+    # Block known vulnerability scanners
+    if ($http_user_agent ~* (sqlmap|nikto|wpscan|masscan|zgrab|nmap|acunetix|gobuster|dirbuster|censys|shodan|morfeus) ) {
+        return 444;
+    }
+
+    # 1. Block access to hidden files / directories EXCEPT .well-known
+    location ~ /\.(?!well-known) {
+        access_log off;
+        log_not_found off;
+        return 444;
+    }
+
+    # 2. Block direct probing for sensitive file extensions
+    location ~* (\.env|\.git|\.yml|\.yaml|\.ini|\.conf|\.bak|\.backup|\.old|\.sql|\.tar|\.gz|\.zip|\.bz2|\.7z|\.log|\.swp|\.temp|\.tmp)$ {
+        access_log off;
+        log_not_found off;
+        return 444;
+    }
+
+    # 3. Block common exploit targets
+    location ~* /(wp-admin|wp-content|wp-includes|wp-login|xmlrpc\.php|phpmyadmin|pma|cgi-bin|actuator|telescope|_profiler|autodiscover|server-status|solr|boaform) {
+        access_log off;
+        log_not_found off;
+        return 444;
+    }
+
+    # 4. ACME Challenge
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    # 5. Main proxy location to FastAPI Uvicorn
+    location / {
+        limit_req zone=atsproof_req_limit burst=20 nodelay;
+
+        proxy_pass http://127.0.0.1:30088;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Connection "";
+
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}

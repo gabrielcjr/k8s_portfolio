@@ -1,0 +1,165 @@
+# HTTP Server for KoBo Multi-Tenant (Redirect all traffic to HTTPS)
+server {
+    listen 80;
+    server_name missoes.gabrielcjr.website evangelismo.gabrielcjr.website getsemani.gabrielcjr.website;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    client_max_body_size 50M;
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# HTTPS Server: missoes.gabrielcjr.website (Tenant 1 - Missões)
+server {
+    listen 443 ssl http2;
+    server_name missoes.gabrielcjr.website;
+
+    ssl_certificate /etc/letsencrypt/live/missoes.gabrielcjr.website/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/missoes.gabrielcjr.website/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL_MISSOES:10m;
+    ssl_session_timeout 10m;
+
+    client_max_body_size 50M;
+
+    # Gzip Compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 256;
+    gzip_proxied any;
+    gzip_types text/plain text/css text/xml application/json application/javascript application/xml+rss application/atom+xml image/svg+xml;
+
+    # Security Headers
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(self)" always;
+
+    # ACME Challenge for Let's Encrypt
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    # Reverse Proxy to KoBo NodePort 30090
+    location / {
+        proxy_pass http://127.0.0.1:30090;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 120s;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+    }
+}
+
+# HTTPS Server: evangelismo.gabrielcjr.website (Tenant 2 - Evangelismo)
+server {
+    listen 443 ssl http2;
+    server_name evangelismo.gabrielcjr.website;
+
+    ssl_certificate /etc/letsencrypt/live/evangelismo.gabrielcjr.website/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/evangelismo.gabrielcjr.website/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL_EVANGELISMO:10m;
+    ssl_session_timeout 10m;
+
+    client_max_body_size 50M;
+
+    # Gzip Compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 256;
+    gzip_proxied any;
+    gzip_types text/plain text/css text/xml application/json application/javascript application/xml+rss application/atom+xml image/svg+xml;
+
+    # Security Headers
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(self)" always;
+
+    # ACME Challenge for Let's Encrypt
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    # Reverse Proxy to KoBo Evangelismo NodePort 30091
+    location / {
+        proxy_pass http://127.0.0.1:30091;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 120s;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+    }
+}
+
+# HTTPS Server: getsemani.gabrielcjr.website (Tenant 3 - Getsêmani)
+server {
+    listen 443 ssl http2;
+    server_name getsemani.gabrielcjr.website;
+
+    ssl_certificate /etc/letsencrypt/live/getsemani.gabrielcjr.website/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/getsemani.gabrielcjr.website/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL_GETSEMANI:10m;
+    ssl_session_timeout 10m;
+
+    client_max_body_size 50M;
+
+    # Gzip Compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 256;
+    gzip_proxied any;
+    gzip_types text/plain text/css text/xml application/json application/javascript application/xml+rss application/atom+xml image/svg+xml;
+
+    # Security Headers
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(self)" always;
+
+    # ACME Challenge for Let's Encrypt
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    # Reverse Proxy to KoBo Getsemani NodePort 30092
+    location / {
+        proxy_pass http://127.0.0.1:30092;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 120s;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+    }
+}
